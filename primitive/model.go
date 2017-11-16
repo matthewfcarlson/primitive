@@ -8,6 +8,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
+//Model is the model that holds the shapes and the current score
 type Model struct {
 	Sw, Sh     int
 	Scale      float64
@@ -20,9 +21,11 @@ type Model struct {
 	Colors     []Color
 	Scores     []float64
 	Workers    []*Worker
+	Previous   *Model
 }
 
-func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
+//NewModel Creates a new mode
+func NewModel(target image.Image, background Color, size, numWorkers int, previous *Model) *Model {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
 	aspect := float64(w) / float64(h)
@@ -43,6 +46,7 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 	model.Sh = sh
 	model.Scale = scale
 	model.Background = background
+	model.Previous = previous
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
 	model.Score = differenceFull(model.Target, model.Current)
@@ -63,6 +67,7 @@ func (model *Model) newContext() *gg.Context {
 	return dc
 }
 
+//Frames gets the current frames?
 func (model *Model) Frames(scoreDelta float64) []image.Image {
 	var result []image.Image
 	dc := model.newContext()
@@ -83,6 +88,7 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 	return result
 }
 
+//SVG generates an SVG xml document from the current shapes
 func (model *Model) SVG() string {
 	bg := model.Background
 	var lines []string
@@ -100,6 +106,7 @@ func (model *Model) SVG() string {
 	return strings.Join(lines, "\n")
 }
 
+//Add adds a new shape to the model
 func (model *Model) Add(shape Shape, alpha int) {
 	before := copyRGBA(model.Current)
 	lines := shape.Rasterize()
@@ -116,6 +123,7 @@ func (model *Model) Add(shape Shape, alpha int) {
 	shape.Draw(model.Context, model.Scale)
 }
 
+//Step does one iteration will all workers
 func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
 	// state = HillClimb(state, 1000).(*State)
@@ -145,9 +153,9 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 }
 
 func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
-	wn := len(model.Workers)
-	ch := make(chan *State, wn)
-	wm := m / wn
+	wn := len(model.Workers)    //number of workers
+	ch := make(chan *State, wn) //channel
+	wm := m / wn                //attemps per worker?
 	if m%wn != 0 {
 		wm++
 	}

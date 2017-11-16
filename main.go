@@ -30,6 +30,7 @@ var (
 	Nth        int
 	Repeat     int
 	V, VV      bool
+	IsVideo    bool
 )
 
 type flagArray []string
@@ -65,7 +66,7 @@ func (i *shapeConfigArray) Set(value string) error {
 func init() {
 	flag.StringVar(&Input, "i", "", "input image path")
 	flag.Var(&Outputs, "o", "output image path")
-	flag.IntVar(&RandomSeed, "seed", time.Now().UTC().UnixNano(), "The seed for the random number generator")
+	flag.IntVar(&RandomSeed, "seed", int(time.Now().UTC().UnixNano()), "The seed for the random number generator")
 	flag.Var(&Configs, "n", "number of primitives")
 	flag.StringVar(&Background, "bg", "", "background color (hex)")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
@@ -76,6 +77,7 @@ func init() {
 	flag.IntVar(&Nth, "nth", 1, "save every Nth frame (put \"%d\" in path)")
 	flag.IntVar(&Repeat, "rep", 0, "add N extra shapes per iteration with reduced search")
 	flag.BoolVar(&V, "v", false, "verbose")
+	flag.BoolVar(&IsVideo, "video", false, "process it as a video")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
 }
 
@@ -128,19 +130,19 @@ func main() {
 	}
 
 	// seed random number generator
-	rand.Seed(RandomSeed)
+	rand.Seed(int64(RandomSeed))
 
 	// determine worker count
 	if Workers < 1 {
 		Workers = runtime.NumCPU()
 	}
 
-	frameNumber:= 0
+	frameNumber := 0
 
-	
 	imagesRemain := true
+	var previousModel *primitive.Model
 
-	for (imagesRemain == true){
+	for imagesRemain == true {
 		// read input image
 		InputFileName := Input
 
@@ -149,14 +151,14 @@ func main() {
 			InputFileName = fmt.Sprintf(Input, frameNumber)
 			frameNumber++
 		}
-			
+
 		primitive.Log(1, "reading %s\n", InputFileName)
 		input, err := primitive.LoadImage(InputFileName)
-		check(err)
+		//check(err)
 
 		if err != nil {
 			imagesRemain = false
-			break;
+			break
 		}
 
 		// scale down input image if needed
@@ -174,10 +176,11 @@ func main() {
 		}
 
 		// run algorithm
-		model := primitive.NewModel(input, bg, OutputSize, Workers)
+		model := primitive.NewModel(input, bg, OutputSize, Workers, previousModel)
 		primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 		start := time.Now()
 		frame := 0
+		//start of main loop
 		for j, config := range Configs {
 			primitive.Log(1, "count=%d, mode=%d, alpha=%d, repeat=%d\n",
 				config.Count, config.Mode, config.Alpha, config.Repeat)
@@ -196,8 +199,8 @@ func main() {
 				for _, output := range Outputs {
 					ext := strings.ToLower(filepath.Ext(output))
 					percent := strings.Contains(output, "%")
-					multipleInput := strings.Contains(Input, "%") {
-					saveFrames := percent && ext != ".gif" 
+					multipleInput := strings.Contains(Input, "%")
+					saveFrames := percent && ext != ".gif"
 					saveFrames = saveFrames && frame%Nth == 0
 					saveFrames = saveFrames && multipleInput
 					last := j == len(Configs)-1 && i == config.Count-1
@@ -207,7 +210,12 @@ func main() {
 							path = fmt.Sprintf(output, frame)
 						}
 						if multipleInput {
-							path = fmt.Sprintf(output, frameNumber)
+
+							if !percent {
+								path = fmt.Sprintf(filepath.Base(output)+"%d"+filepath.Ext(output), frameNumber)
+							} else {
+								path = fmt.Sprintf(output, frameNumber)
+							}
 						}
 						primitive.Log(1, "writing %s\n", path)
 						switch ext {
@@ -227,5 +235,8 @@ func main() {
 				}
 			}
 		}
+		previousModel = model
+
+		//end of main loop
 	}
 }
