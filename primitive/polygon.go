@@ -36,7 +36,7 @@ func (p *Polygon) Draw(dc *gg.Context, scale float64) {
 	dc.Fill()
 }
 
-func (p *Polygon) Distance(o Shape) float64 {
+func (p *Polygon) Distance(o ShapeDef) float64 {
 	return 0.0
 }
 
@@ -112,4 +112,9 @@ func (p *Polygon) Rasterize() []Scanline {
 		}
 	}
 	return fillPath(p.Worker, path)
+}
+
+func (p* Polygon) Definition() ShapeDef {
+	def := ShapeDef{ShapeTypePolygon, make([][]int,2)}
+	return def
 }

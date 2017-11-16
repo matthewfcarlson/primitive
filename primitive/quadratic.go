@@ -37,7 +37,7 @@ func (q *Quadratic) Draw(dc *gg.Context, scale float64) {
 	dc.Stroke()
 }
 
-func (q *Quadratic) Distance(o Shape) float64 {
+func (q *Quadratic) Distance(o ShapeDef) float64 {
 	return 0.0
 }
 
@@ -101,4 +101,9 @@ func (q *Quadratic) Rasterize() []Scanline {
 	path.Add2(p2, p3)
 	width := fix(q.Width)
 	return strokePath(q.Worker, path, width, raster.RoundCapper, raster.RoundJoiner)
+}
+
+func (e* Quadratic) Definition() ShapeDef {
+	def := ShapeDef{ShapeTypeQuadratic, make([][]int,3)}
+	return def
 }

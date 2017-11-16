@@ -169,8 +169,22 @@ func rasterizeTriangleTop(x1, y1, x2, y2, x3, y3 int, buf []Scanline) []Scanline
 	}
 	return buf
 }
-func (t *Triangle) Distance(o Shape) float64 {
-	fmt.Printf("other triangle: %v\n", o)
+func (t *Triangle) Distance(oDef ShapeDef) float64 {
+	//fmt.Printf("other triangle: %v\n", o)
+	sDef := t.Definition() //get ourself definition
+	
+	//fmt.Printf("Us: %v \t Them: %v\n",sDef, oDef)
+	if (oDef.ShType != sDef.ShType) {
+		return 100; //if we are comparing different shapes, compute a distance of 100
+	}
+	var totalDistance float64
+	for index,element := range oDef.Verticies {
+		for dimensionIndex, position := range element {
+			totalDistance += math.Abs(float64(position)-float64(sDef.Verticies[index][dimensionIndex]))
+		}
+	}
+
+	return totalDistance
 	//inter := interface{}(o)
 	//ot := inter.(Triangle)
 	//fmt.Printf("Other shape %v\n", ot.X1)
@@ -178,12 +192,12 @@ func (t *Triangle) Distance(o Shape) float64 {
 		return 0
 	}
 	return uint16(ref.Uint())*/
-
-	return 0.0
 }
 
 func (t* Triangle) Definition() ShapeDef {
 	def := ShapeDef{ShapeTypeTriangle, make([][]int,3)}
-	def.Verticies[0] = {t.X1,t.Y1}
+	def.Verticies[0] = []int{t.X1,t.Y1}
+	def.Verticies[1] = []int{t.X2,t.Y2}
+	def.Verticies[2] = []int{t.X3,t.Y3}
 	return def
 }

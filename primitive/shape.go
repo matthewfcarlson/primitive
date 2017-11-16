@@ -13,7 +13,7 @@ type Shape interface {
 	Copy() Shape
 	Mutate()
 	Draw(dc *gg.Context, scale float64)
-	Distance(Shape) float64
+	Distance(ShapeDef) float64
 	SVG(attrs string) string
 	Definition() ShapeDef //returns the definition of the shape
 }

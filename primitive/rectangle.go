@@ -49,7 +49,7 @@ func (r *Rectangle) SVG(attrs string) string {
 		attrs, x1, y1, w, h)
 }
 
-func (r *Rectangle) Distance(o Shape) float64 {
+func (r *Rectangle) Distance(o ShapeDef) float64 {
 	return 0.0
 }
 
@@ -79,6 +79,11 @@ func (r *Rectangle) Rasterize() []Scanline {
 		lines = append(lines, Scanline{y, x1, x2, 0xffff})
 	}
 	return lines
+}
+
+func (r* Rectangle) Definition() ShapeDef {
+	def := ShapeDef{ShapeTypeRectangle, make([][]int,3)}
+	return def
 }
 
 type RotatedRectangle struct {
@@ -201,6 +206,12 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 	return lines
 }
 
-func (r *RotatedRectangle) Distance(o Shape) float64 {
+func (r *RotatedRectangle) Distance(o ShapeDef) float64 {
 	return 0.0
+}
+
+
+func (r* RotatedRectangle) Definition() ShapeDef {
+	def := ShapeDef{ShapeTypeRotatedRectangle, make([][]int,3)}
+	return def
 }

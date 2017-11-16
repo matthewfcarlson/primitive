@@ -37,7 +37,7 @@ func (c *Ellipse) Draw(dc *gg.Context, scale float64) {
 	dc.Fill()
 }
 
-func (c *Ellipse) Distance(o Shape) float64 {
+func (c *Ellipse) Distance(o ShapeDef) float64 {
 	return 0.0
 }
 
@@ -101,6 +101,11 @@ func (c *Ellipse) Rasterize() []Scanline {
 		}
 	}
 	return lines
+}
+
+func (e* Ellipse) Definition() ShapeDef {
+	def := ShapeDef{ShapeTypeEllipse, make([][]int,2)}
+	return def
 }
 
 type RotatedEllipse struct {
@@ -182,6 +187,10 @@ func (c *RotatedEllipse) Rasterize() []Scanline {
 	return fillPath(c.Worker, path)
 }
 
-func (r *RotatedEllipse) Distance(o Shape) float64 {
+func (r *RotatedEllipse) Distance(o ShapeDef) float64 {
 	return 0.0
+}
+func (e* RotatedEllipse) Definition() ShapeDef {
+	def := ShapeDef{ShapeTypeRotatedEllipse, make([][]int,2)}
+	return def
 }
