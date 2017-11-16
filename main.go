@@ -24,6 +24,7 @@ var (
 	Alpha      int
 	InputSize  int
 	OutputSize int
+	RandomSeed int
 	Mode       int
 	Workers    int
 	Nth        int
@@ -64,6 +65,7 @@ func (i *shapeConfigArray) Set(value string) error {
 func init() {
 	flag.StringVar(&Input, "i", "", "input image path")
 	flag.Var(&Outputs, "o", "output image path")
+	flag.IntVar(&RandomSeed, "seed", time.Now().UTC().UnixNano(), "The seed for the random number generator")
 	flag.Var(&Configs, "n", "number of primitives")
 	flag.StringVar(&Background, "bg", "", "background color (hex)")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
@@ -126,76 +128,99 @@ func main() {
 	}
 
 	// seed random number generator
-	rand.Seed(time.Now().UTC().UnixNano())
+	rand.Seed(RandomSeed)
 
 	// determine worker count
 	if Workers < 1 {
 		Workers = runtime.NumCPU()
 	}
 
-	// read input image
-	primitive.Log(1, "reading %s\n", Input)
-	input, err := primitive.LoadImage(Input)
-	check(err)
+	frameNumber:= 0
 
-	// scale down input image if needed
-	size := uint(InputSize)
-	if size > 0 {
-		input = resize.Thumbnail(size, size, input, resize.Bilinear)
-	}
+	
+	imagesRemain := true
 
-	// determine background color
-	var bg primitive.Color
-	if Background == "" {
-		bg = primitive.MakeColor(primitive.AverageImageColor(input))
-	} else {
-		bg = primitive.MakeHexColor(Background)
-	}
+	for (imagesRemain == true){
+		// read input image
+		InputFileName := Input
+		if strings.Contains(Input, "%") {
+			InputFileName = fmt.Sprintf(Input, frameNumber)
+			frameNumber++
+		}
+			
+		primitive.Log(1, "reading %s\n", InputFileName)
+		input, err := primitive.LoadImage(InputFileName)
+		check(err)
 
-	// run algorithm
-	model := primitive.NewModel(input, bg, OutputSize, Workers)
-	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
-	start := time.Now()
-	frame := 0
-	for j, config := range Configs {
-		primitive.Log(1, "count=%d, mode=%d, alpha=%d, repeat=%d\n",
-			config.Count, config.Mode, config.Alpha, config.Repeat)
+		if err != nil {
+			imagesRemain = false
+			break;
+		}
 
-		for i := 0; i < config.Count; i++ {
-			frame++
+		// scale down input image if needed
+		size := uint(InputSize)
+		if size > 0 {
+			input = resize.Thumbnail(size, size, input, resize.Bilinear)
+		}
 
-			// find optimal shape and add it to the model
-			t := time.Now()
-			n := model.Step(primitive.ShapeType(config.Mode), config.Alpha, config.Repeat)
-			nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
-			elapsed := time.Since(start).Seconds()
-			primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", frame, elapsed, model.Score, n, nps)
+		// determine background color
+		var bg primitive.Color
+		if Background == "" {
+			bg = primitive.MakeColor(primitive.AverageImageColor(input))
+		} else {
+			bg = primitive.MakeHexColor(Background)
+		}
 
-			// write output image(s)
-			for _, output := range Outputs {
-				ext := strings.ToLower(filepath.Ext(output))
-				percent := strings.Contains(output, "%")
-				saveFrames := percent && ext != ".gif"
-				saveFrames = saveFrames && frame%Nth == 0
-				last := j == len(Configs)-1 && i == config.Count-1
-				if saveFrames || last {
-					path := output
-					if percent {
-						path = fmt.Sprintf(output, frame)
-					}
-					primitive.Log(1, "writing %s\n", path)
-					switch ext {
-					default:
-						check(fmt.Errorf("unrecognized file extension: %s", ext))
-					case ".png":
-						check(primitive.SavePNG(path, model.Context.Image()))
-					case ".jpg", ".jpeg":
-						check(primitive.SaveJPG(path, model.Context.Image(), 95))
-					case ".svg":
-						check(primitive.SaveFile(path, model.SVG()))
-					case ".gif":
-						frames := model.Frames(0.001)
-						check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+		// run algorithm
+		model := primitive.NewModel(input, bg, OutputSize, Workers)
+		primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
+		start := time.Now()
+		frame := 0
+		for j, config := range Configs {
+			primitive.Log(1, "count=%d, mode=%d, alpha=%d, repeat=%d\n",
+				config.Count, config.Mode, config.Alpha, config.Repeat)
+
+			for i := 0; i < config.Count; i++ {
+				frame++
+
+				// find optimal shape and add it to the model
+				t := time.Now()
+				n := model.Step(primitive.ShapeType(config.Mode), config.Alpha, config.Repeat)
+				nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
+				elapsed := time.Since(start).Seconds()
+				primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", frame, elapsed, model.Score, n, nps)
+
+				// write output image(s)
+				for _, output := range Outputs {
+					ext := strings.ToLower(filepath.Ext(output))
+					percent := strings.Contains(output, "%")
+					multipleInput := strings.Contains(Input, "%") {
+					saveFrames := percent && ext != ".gif" 
+					saveFrames = saveFrames && frame%Nth == 0
+					saveFrames = saveFrames && multipleInput
+					last := j == len(Configs)-1 && i == config.Count-1
+					if saveFrames || last {
+						path := output
+						if percent {
+							path = fmt.Sprintf(output, frame)
+						}
+						if multipleInput {
+							path = fmt.Sprintf(output, frameNumber)
+						}
+						primitive.Log(1, "writing %s\n", path)
+						switch ext {
+						default:
+							check(fmt.Errorf("unrecognized file extension: %s", ext))
+						case ".png":
+							check(primitive.SavePNG(path, model.Context.Image()))
+						case ".jpg", ".jpeg":
+							check(primitive.SaveJPG(path, model.Context.Image(), 95))
+						case ".svg":
+							check(primitive.SaveFile(path, model.SVG()))
+						case ".gif":
+							frames := model.Frames(0.001)
+							check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+						}
 					}
 				}
 			}
