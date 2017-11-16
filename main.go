@@ -143,6 +143,8 @@ func main() {
 	for (imagesRemain == true){
 		// read input image
 		InputFileName := Input
+
+		//TODO: be able to handle a video image directly
 		if strings.Contains(Input, "%") {
 			InputFileName = fmt.Sprintf(Input, frameNumber)
 			frameNumber++
