@@ -37,6 +37,10 @@ func (q *Quadratic) Draw(dc *gg.Context, scale float64) {
 	dc.Stroke()
 }
 
+func (q *Quadratic) Distance(o Shape) float64 {
+	return 0.0
+}
+
 func (q *Quadratic) SVG(attrs string) string {
 	// TODO: this is a little silly
 	attrs = strings.Replace(attrs, "fill", "stroke", -1)

@@ -37,6 +37,10 @@ func (c *Ellipse) Draw(dc *gg.Context, scale float64) {
 	dc.Fill()
 }
 
+func (c *Ellipse) Distance(o Shape) float64 {
+	return 0.0
+}
+
 func (c *Ellipse) SVG(attrs string) string {
 	return fmt.Sprintf(
 		"<ellipse %s cx=\"%d\" cy=\"%d\" rx=\"%d\" ry=\"%d\" />",
@@ -176,4 +180,8 @@ func (c *RotatedEllipse) Rasterize() []Scanline {
 		path.Add2(fixp(cx+c.X, cy+c.Y), fixp(x2+c.X, y2+c.Y))
 	}
 	return fillPath(c.Worker, path)
+}
+
+func (r *RotatedEllipse) Distance(o Shape) float64 {
+	return 0.0
 }

@@ -49,6 +49,10 @@ func (r *Rectangle) SVG(attrs string) string {
 		attrs, x1, y1, w, h)
 }
 
+func (r *Rectangle) Distance(o Shape) float64 {
+	return 0.0
+}
+
 func (r *Rectangle) Copy() Shape {
 	a := *r
 	return &a
@@ -195,4 +199,8 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 		}
 	}
 	return lines
+}
+
+func (r *RotatedRectangle) Distance(o Shape) float64 {
+	return 0.0
 }

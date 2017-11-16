@@ -12,7 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/matthewfcarlson/primitive/primitive"
+	"./primitive"
+	//"github.com/matthewfcarlson/primitive/primitive"
 	"github.com/nfnt/resize"
 )
 

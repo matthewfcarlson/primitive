@@ -126,16 +126,21 @@ func (model *Model) Add(shape Shape, alpha int) {
 //Step does one iteration will all workers
 func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 
+	var PreviousShape Shape
+	var state *State
 	if model.Previous != nil {
 		currentShapeIndex := len(model.Shapes)
-		fmt.Printf("Previous shape at %d was %d", currentShapeIndex, model.Previous.Shapes[currentShapeIndex])
+		fmt.Printf("Previous shape at %d was %d\t", currentShapeIndex, model.Previous.Shapes[currentShapeIndex])
+		PreviousShape = model.Previous.Shapes[currentShapeIndex]
+		state = NewState(model.Workers[0], PreviousShape, alpha)
+		state.Worker.Init(model.Current, model.Score)
+
+	} else {
+		state = model.runWorkers(shapeType, alpha, 1000, 100, 16)
+		model.Add(state.Shape, state.Alpha)
 	}
-
-	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
-	// state = HillClimb(state, 1000).(*State)
-	model.Add(state.Shape, state.Alpha)
-
-	for i := 0; i < repeat; i++ {
+	//if we are repeating in the same search place?
+	for i := 0; i < repeat && model.Previous != nil; i++ {
 		state.Worker.Init(model.Current, model.Score)
 		a := state.Energy()
 		state = HillClimb(state, 100).(*State)

@@ -36,6 +36,10 @@ func (p *Polygon) Draw(dc *gg.Context, scale float64) {
 	dc.Fill()
 }
 
+func (p *Polygon) Distance(o Shape) float64 {
+	return 0.0
+}
+
 func (p *Polygon) SVG(attrs string) string {
 	return ""
 }

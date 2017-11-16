@@ -7,6 +7,7 @@ type Shape interface {
 	Copy() Shape
 	Mutate()
 	Draw(dc *gg.Context, scale float64)
+	Distance(o Shape) float64
 	SVG(attrs string) string
 }
 
