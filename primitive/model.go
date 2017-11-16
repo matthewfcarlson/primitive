@@ -125,6 +125,12 @@ func (model *Model) Add(shape Shape, alpha int) {
 
 //Step does one iteration will all workers
 func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
+
+	if model.Previous != nil {
+		currentShapeIndex := len(model.Shapes)
+		fmt.Printf("Previous shape at %d was %d",currentShapeIndex,model.Previous.Shapes[currentShapeIndex])
+	}
+
 	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
 	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape, state.Alpha)
@@ -179,4 +185,5 @@ func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 
 func (model *Model) runWorker(worker *Worker, t ShapeType, a, n, age, m int, ch chan *State) {
 	ch <- worker.BestHillClimbState(t, a, n, age, m)
+}
 }

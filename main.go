@@ -141,6 +141,7 @@ func main() {
 
 	imagesRemain := true
 	var previousModel *primitive.Model
+	previousModel = nil
 
 	for imagesRemain == true {
 		// read input image
@@ -202,7 +203,7 @@ func main() {
 					multipleInput := strings.Contains(Input, "%")
 					saveFrames := percent && ext != ".gif"
 					saveFrames = saveFrames && frame%Nth == 0
-					saveFrames = saveFrames && multipleInput
+					saveFrames = saveFrames && !multipleInput
 					last := j == len(Configs)-1 && i == config.Count-1
 					if saveFrames || last {
 						path := output
