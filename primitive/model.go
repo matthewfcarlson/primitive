@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"strings"
-	"math"
 
 	"github.com/fogleman/gg"
 )
@@ -135,7 +134,7 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 		PreviousShapeDef = model.Previous.Shapes[currentShapeIndex].Definition()
 		fmt.Printf("Previous shape at %d was %d", currentShapeIndex, PreviousShapeDef)
 		state = model.runWorkersWithPreviousShape(shapeType,alpha, 1000, 100, 16, PreviousShapeDef)
-		scalingFactor := math.Max(float64(model.Sw), float64(model.Sh))
+		scalingFactor := float64(model.Sw)* float64(model.Sh)
 		distance := state.Shape.Distance(PreviousShapeDef) / scalingFactor
 		fmt.Printf(" Distance is %f at scale %v width %v \n",distance, scalingFactor, model.Sw)
 		

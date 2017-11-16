@@ -58,7 +58,7 @@ func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	if worker.Previous.ShType != ShapeTypeAny {
 		distance := shape.Distance(worker.Previous) / (float64(worker.W)*float64(worker.H))
 		//fmt.Printf("New shape has difference of %f\n",distance)
-		return distance + differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
+		return (1+distance) * differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
 	} else {
 		return differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
 	}
