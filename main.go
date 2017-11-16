@@ -236,8 +236,10 @@ func main() {
 				}
 			}
 		}
-		previousModel = model
 
+		//if IsVideo {
+		previousModel = model
+		//}
 		//end of main loop
 	}
 }
