@@ -4,7 +4,6 @@ import (
 	"image"
 	"math/rand"
 	"time"
-
 	"github.com/golang/freetype/raster"
 )
 
@@ -19,6 +18,7 @@ type Worker struct {
 	Rnd        *rand.Rand
 	Score      float64
 	Counter    int
+	Previous   ShapeDef
 }
 
 func NewWorker(target *image.RGBA) *Worker {
@@ -40,7 +40,12 @@ func (worker *Worker) Init(current *image.RGBA, score float64) {
 	worker.Current = current
 	worker.Score = score
 	worker.Counter = 0
+	worker.Previous.ShType=ShapeTypeAny
 	worker.Heatmap.Clear()
+}
+
+func (worker *Worker) SetPreviousShape(prev ShapeDef) {
+	worker.Previous = prev
 }
 
 func (worker *Worker) Energy(shape Shape, alpha int) float64 {
@@ -50,7 +55,13 @@ func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	color := computeColor(worker.Target, worker.Current, lines, alpha)
 	copyLines(worker.Buffer, worker.Current, lines)
 	drawLines(worker.Buffer, color, lines)
-	return differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
+	if worker.Previous.ShType != ShapeTypeAny {
+		distance := shape.Distance(worker.Previous) / (float64(worker.W)*float64(worker.H))
+		//fmt.Printf("New shape has difference of %f\n",distance)
+		return distance + differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
+	} else {
+		return differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
+	}
 }
 
 func (worker *Worker) BestHillClimbState(t ShapeType, a, n, age, m int) *State {

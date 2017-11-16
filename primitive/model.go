@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"strings"
+	"math"
 
 	"github.com/fogleman/gg"
 )
@@ -130,11 +131,14 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	var state *State
 	if model.Previous != nil {
 		currentShapeIndex := len(model.Shapes)
-		fmt.Printf("Previous shape at %d was %d", currentShapeIndex, model.Previous.Shapes[currentShapeIndex])
+		
 		PreviousShapeDef = model.Previous.Shapes[currentShapeIndex].Definition()
-		state = model.runWorkers(shapeType,alpha, 1000, 100, 16)
-		scalingFactor := math.Max(model.Sw, model.Sh)
-		fmt.Printf(" Distance is %f at scale %v width %v \n",state.Shape.Distance(PreviousShapeDef), model.Scale, model.Sw)
+		fmt.Printf("Previous shape at %d was %d", currentShapeIndex, PreviousShapeDef)
+		state = model.runWorkersWithPreviousShape(shapeType,alpha, 1000, 100, 16, PreviousShapeDef)
+		scalingFactor := math.Max(float64(model.Sw), float64(model.Sh))
+		distance := state.Shape.Distance(PreviousShapeDef) / scalingFactor
+		fmt.Printf(" Distance is %f at scale %v width %v \n",distance, scalingFactor, model.Sw)
+		
 	} else {
 	
 		state = model.runWorkers(shapeType, alpha, 1000, 100, 16)
@@ -175,6 +179,32 @@ func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	for i := 0; i < wn; i++ {
 		worker := model.Workers[i]
 		worker.Init(model.Current, model.Score)
+		go model.runWorker(worker, t, a, n, age, wm, ch)
+	}
+	var bestEnergy float64
+	var bestState *State
+	for i := 0; i < wn; i++ {
+		state := <-ch
+		energy := state.Energy()
+		if i == 0 || energy < bestEnergy {
+			bestEnergy = energy
+			bestState = state
+		}
+	}
+	return bestState
+}
+
+func (model *Model) runWorkersWithPreviousShape(t ShapeType, a, n, age, m int, sd ShapeDef) *State {
+	wn := len(model.Workers)    //number of workers
+	ch := make(chan *State, wn) //channel
+	wm := m / wn                //attemps per worker?
+	if m%wn != 0 {
+		wm++
+	}
+	for i := 0; i < wn; i++ {
+		worker := model.Workers[i]
+		worker.Init(model.Current, model.Score)
+		worker.SetPreviousShape(sd)
 		go model.runWorker(worker, t, a, n, age, wm, ch)
 	}
 	var bestEnergy float64
