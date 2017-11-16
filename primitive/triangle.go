@@ -170,6 +170,20 @@ func rasterizeTriangleTop(x1, y1, x2, y2, x3, y3 int, buf []Scanline) []Scanline
 	return buf
 }
 func (t *Triangle) Distance(o Shape) float64 {
-	OtherTriangle := o
+	fmt.Printf("other triangle: %v\n", o)
+	//inter := interface{}(o)
+	//ot := inter.(Triangle)
+	//fmt.Printf("Other shape %v\n", ot.X1)
+	/*if ref.Kind() != reflect.Uint16 {
+		return 0
+	}
+	return uint16(ref.Uint())*/
+
 	return 0.0
+}
+
+func (t* Triangle) Definition() ShapeDef {
+	def := ShapeDef{ShapeTypeTriangle, make([][]int,3)}
+	def.Verticies[0] = {t.X1,t.Y1}
+	return def
 }

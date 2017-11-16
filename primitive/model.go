@@ -137,6 +137,7 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 		a := state.Energy()
 		state = HillClimb(state, 100).(*State)
 		b := state.Energy()
+		fmt.Printf("Adding new shape with distance %f\n", state.Shape.Distance(PreviousShape))
 		if a == b {
 			model.Add(PreviousShape, alpha)
 		} else {
