@@ -1,12 +1,12 @@
 # Primitive Pictures
 
-Reproducing images with geometric primitives.
+Reproducing videos with geometric primitives.
 
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/16550611738.200.128.4.5.png)
 
 ### How it Works
 
-A target image is provided as input. The algorithm tries to find the single most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding *one shape at a time*. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
+A target video is provided as input. The algorithm tries to find the single most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding *one shape at a time*. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
 
 ### Primitive for macOS
 
