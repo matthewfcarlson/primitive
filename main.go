@@ -138,7 +138,7 @@ func main() {
 		Workers = runtime.NumCPU()
 	}
 
-	frameNumber := 0
+	frameNumber := 1
 
 	imagesRemain := true
 	var previousModel *primitive.Model

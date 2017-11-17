@@ -1,6 +1,8 @@
 /*.png
 /*.svg
 /*.gif
+video_post/*
+video_pre/*
 
-*.mp4
+
 *.exe

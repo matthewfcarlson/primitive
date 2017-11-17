@@ -1,30 +1,29 @@
-@echo off
+@cho off
 
 @setlocal
 set start=%time%
-set input_video=test2.mp4
-set fps=24
-set polygons=750
+set input_video=test3.mp4
+set fps=27
+set polygons=300
 
 mkdir video_pre
 echo Removing old files
-del video_pre\*.*
+del -f video_pre\*.*
 
 echo Getting frames
-ffmpeg\ffmpeg.exe -i %input_video% -r %fps% "video_pre\frame%%04d.png"
+@ffmpeg\ffmpeg.exe -i %input_video% -r %fps% "video_pre\frame%%04d.png"
 echo Got frames
 
 mkdir video_post
-del video_post\*.*
-for /f %%f in ('dir /b .\video_pre\') DO (
-    echo Processing %%f
-    primitive -i video_pre\%%f -o video_post\post-%%f -n %polygons%
-    primitive -i video_pre\%%f -o video_post\post-lowdef-%%f -n 150
-)
+del -rf video_post\*.*
+main.exe -i "video_pre\frame%%04d.png" -o "video_post\post-frame%%04d.png" -n %polygons% -video
+main.exe -i "video_pre\frame%%04d.png" -o "video_post\post-nv-frame_nv%%04d.png" -n %polygons% 
+
 echo Done Processing
 echo Recombining frames
-ffmpeg\ffmpeg -framerate %fps% -i video_post\post-frame%%04d.png output.mp4
-ffmpeg\ffmpeg -framerate %fps% -i video_post\post-lowdef-frame%%04d.png output_lowdef.mp4
+@ffmpeg\ffmpeg -framerate %fps% -i video_post\post-frame%%04d.png -c:v libx264 -vf "fps=25,format=yuv420p" output.mp4
+@ffmpeg\ffmpeg -framerate %fps% -i video_post\post-nv-frame%%04d.png -c:v libx264 -vf "fps=25,format=yuv420p" output_nv.mp4
+-vf "fps=25,format=yuv420p"
 echo Done
 
 set end=%time%
