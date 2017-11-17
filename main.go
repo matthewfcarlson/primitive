@@ -237,7 +237,7 @@ func main() {
 				}
 			}
 		}
-
+		//if we are processing a video, store the previous model
 		if IsVideo {
 			previousModel = model
 		}
