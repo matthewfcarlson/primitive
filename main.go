@@ -238,9 +238,9 @@ func main() {
 			}
 		}
 
-		//if IsVideo {
-		previousModel = model
-		//}
+		if IsVideo {
+			previousModel = model
+		}
 		//end of main loop
 	}
 }
